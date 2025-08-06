@@ -52,7 +52,6 @@ namespace DdcTraySwitcher
         {
             var menu = new ContextMenuStrip();
 
-            // Monitor-Menü
             var monitorMenu = new ToolStripMenuItem("Choose monitor");
 
             for (int i = 0; i < MonitorHelper.Monitors.Count; i++)
@@ -70,13 +69,12 @@ namespace DdcTraySwitcher
                 {
                     selectedMonitor = idx;
                     SaveSettings();
-                    RebuildMenu(); // wichtig!
+                    RebuildMenu();
                 };
 
                 monitorMenu.DropDownItems.Add(item);
             }
 
-            // Eingang-Menü
             var inputMenu = new ToolStripMenuItem("Choose input");
 
             void AddInput(string label, uint value)
@@ -90,7 +88,7 @@ namespace DdcTraySwitcher
                 {
                     selectedInput = value;
                     SaveSettings();
-                    RebuildMenu(); // wichtig!
+                    RebuildMenu();
                 };
 
                 inputMenu.DropDownItems.Add(item);
