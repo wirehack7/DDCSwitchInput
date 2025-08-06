@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
+    <StartupObject>DdcTraySwitcher.Program</StartupObject>
+  </PropertyGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\icon.ico" />
+  </ItemGroup>
+</Project>
