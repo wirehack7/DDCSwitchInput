@@ -22,12 +22,30 @@ jobs:
         run: |
           dotnet publish src/DdcTraySwitcher.csproj -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -p:IncludeAllContentForSelfExtract=true -o ..\publish
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
-        with:
-          make_latest: true
-          files: |
-            publish/*.exe
-            LICENSE
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
         env:
-            GITHUB_TOKEN: ${{ secrets.TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.TOKEN }} # This token is provided by Actions, you do not need to create your own token
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            New release
+          draft: true
+          prerelease: false
+      - name: Upload release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./publish/DdcTraySwitcher.exe
+          asset_name: DdcTraySwitcher.exe
+          asset_content_type: application/vnd.microsoft.portable-executable
+      - name: Publish release
+        uses: StuYarrow/publish-release@v1.1.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.TOKEN }}
+        with:
+          id: ${{ steps.create_release.outputs.id }}

@@ -9,10 +9,8 @@
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
     <StartupObject>DdcTraySwitcher.Program</StartupObject>
-    <BaseOutputPath>$(SolutionDir)..\bin\</BaseOutputPath>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
     <TrimUnusedDependencies>true</TrimUnusedDependencies>
-    <BaseIntermediateOutputPath>$(SolutionDir)..\obj\</BaseIntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\icon.ico" />
