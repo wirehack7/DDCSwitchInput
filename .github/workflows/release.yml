@@ -29,3 +29,5 @@ jobs:
           files: |
             publish/*.exe
             LICENSE
+        env:
+            GITHUB_TOKEN: ${{ secrets.TOKEN }}
