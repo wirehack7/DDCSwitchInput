@@ -2,6 +2,6 @@
   <PropertyGroup>
     <BaseIntermediateOutputPath>$(SolutionDir)obj\</BaseIntermediateOutputPath>
     <BaseOutputPath>$(SolutionDir)bin\</BaseOutputPath>
-    <PublishDir>$(SolutionDir)..\publish\</PublishDir>
+    <PublishDir>$(SolutionDir)publish\</PublishDir>
   </PropertyGroup>
 </Project>
