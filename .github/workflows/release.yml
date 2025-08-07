@@ -40,7 +40,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./publish/DdcTraySwitcher.exe
+          asset_path: ./src/publish/DdcTraySwitcher.exe
           asset_name: DdcTraySwitcher.exe
           asset_content_type: application/vnd.microsoft.portable-executable
       - name: Publish release
