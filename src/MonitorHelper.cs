@@ -89,7 +89,7 @@ namespace DdcTraySwitcher
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"DDC/CI Fehler: {ex.Message}", "DDC error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"DDC/CI error: {ex.Message}", "DDC error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
         }
