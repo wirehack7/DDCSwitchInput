@@ -104,8 +104,11 @@ namespace DdcTraySwitcher
                 Checked = AutoStart.IsRegistered()
             };
 
+            var switchItem = new ToolStripMenuItem("Switch now", null, (s, e) => ApplySelectedInput());
+
             menu.Items.Add(monitorMenu);
             menu.Items.Add(inputMenu);
+            menu.Items.Add(switchItem);
             menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add(autostartItem);
             menu.Items.Add(new ToolStripMenuItem("Quit", null, (s, e) => Exit()));
@@ -131,16 +134,13 @@ namespace DdcTraySwitcher
             }
         }
 
-        private void OnClick(object sender, MouseEventArgs e)
+        private void ApplySelectedInput()
         {
-            if (e.Button == MouseButtons.Left && e.Clicks == 2)
+            bool result = MonitorHelper.SetInput(selectedMonitor, selectedInput);
+            if (!result)
             {
-                bool result = MonitorHelper.SetInput(selectedMonitor, selectedInput);
-                if (!result)
-                {
-                    MessageBox.Show($"Input could not be set!\nMonitor: {selectedMonitor}, Input: 0x{selectedInput:X}", 
-                        "Fehler", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                MessageBox.Show($"Input could not be set!\nMonitor: {selectedMonitor}, Input: 0x{selectedInput:X}",
+                    "DDC error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -148,12 +148,7 @@ namespace DdcTraySwitcher
         {
             if (e.Button == MouseButtons.Left)
             {
-                bool result = MonitorHelper.SetInput(selectedMonitor, selectedInput);
-                if (!result)
-                {
-                    MessageBox.Show($"Input could not be set!\nMonitor: {selectedMonitor}, Input: 0x{selectedInput:X}", 
-                        "Fehler", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                ApplySelectedInput();
             }
         }
 

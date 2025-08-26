@@ -1,6 +1,8 @@
 # DDCSwitchInput
 
-Switch input device on windows
+Switch display input from the Windows system tray.
+
+Use the tray icon menu to choose a monitor and input source. Double-click the icon or select **Switch now** to apply the change.
 
 ## Additional notes
 
