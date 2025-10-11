@@ -14,6 +14,7 @@ namespace DdcTraySwitcher
             public IntPtr hPhysicalMonitor;
             [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
             public string szPhysicalMonitorDescription;
+            public int OriginalMonitorIndex; // Track original index from enumeration
         }
 
         public delegate bool MonitorEnumDelegate(IntPtr hMonitor, IntPtr hdcMonitor, ref RECT lprcMonitor, IntPtr dwData);
@@ -46,10 +47,12 @@ namespace DdcTraySwitcher
         public struct RECT { public int Left, Top, Right, Bottom; }
 
         public static List<PHYSICAL_MONITOR> Monitors { get; } = new();
+        private static int monitorEnumIndex = 0;
 
         public static void Initialize()
         {
             Monitors.Clear();
+            monitorEnumIndex = 0;
             EnumDisplayMonitors(IntPtr.Zero, IntPtr.Zero, MonitorEnum, IntPtr.Zero);
         }
 
@@ -66,9 +69,15 @@ namespace DdcTraySwitcher
                 foreach (var mon in physical)
                 {
                     if (IsDdcCapable(mon.hPhysicalMonitor))
-                        Monitors.Add(mon);
+                    {
+                        var monWithIndex = mon;
+                        monWithIndex.OriginalMonitorIndex = monitorEnumIndex;
+                        Monitors.Add(monWithIndex);
+                    }
                     else
                         DestroyPhysicalMonitors(1, new[] { mon });
+                    
+                    monitorEnumIndex++;
                 }
             }
 
