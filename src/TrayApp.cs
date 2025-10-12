@@ -17,6 +17,13 @@ namespace DdcTraySwitcher
         {
             LoadSettings();
             MonitorHelper.Initialize();
+            
+            // Validate selected monitor is still valid
+            if (selectedMonitor >= MonitorHelper.Monitors.Count)
+            {
+                selectedMonitor = 0;
+                SaveSettings();
+            }
 
             trayIcon = new NotifyIcon()
             {
@@ -52,30 +59,42 @@ namespace DdcTraySwitcher
         {
             var menu = new ContextMenuStrip();
 
-            var monitorMenu = new ToolStripMenuItem("Choose monitor");
+            var monitorMenu = new ToolStripMenuItem("Select Monitor");
 
-            for (int i = 0; i < MonitorHelper.Monitors.Count; i++)
+            if (MonitorHelper.Monitors.Count == 0)
             {
-                int idx = i;
-                string raw = EdidReader.GetMonitorName(i);
-                string name = $"{raw} (#{i + 1})";
-
-                var item = new ToolStripMenuItem(name)
+                var noMonitorItem = new ToolStripMenuItem("No DDC/CI monitors detected")
                 {
-                    Checked = (selectedMonitor == idx)
+                    Enabled = false
                 };
-
-                item.Click += (s, e) =>
+                monitorMenu.DropDownItems.Add(noMonitorItem);
+            }
+            else
+            {
+                for (int i = 0; i < MonitorHelper.Monitors.Count; i++)
                 {
-                    selectedMonitor = idx;
-                    SaveSettings();
-                    RebuildMenu();
-                };
+                    int idx = i;
+                    var monitor = MonitorHelper.Monitors[i];
+                    string monitorName = EdidReader.GetMonitorName(monitor.OriginalMonitorIndex);
+                    string name = $"{monitorName} (Monitor #{i + 1})";
 
-                monitorMenu.DropDownItems.Add(item);
+                    var item = new ToolStripMenuItem(name)
+                    {
+                        Checked = (selectedMonitor == idx)
+                    };
+
+                    item.Click += (s, e) =>
+                    {
+                        selectedMonitor = idx;
+                        SaveSettings();
+                        RebuildMenu();
+                    };
+
+                    monitorMenu.DropDownItems.Add(item);
+                }
             }
 
-            var inputMenu = new ToolStripMenuItem("Choose input");
+            var inputMenu = new ToolStripMenuItem("Select Input Source");
 
             void AddInput(string label, uint value)
             {
@@ -94,24 +113,52 @@ namespace DdcTraySwitcher
                 inputMenu.DropDownItems.Add(item);
             }
 
-            AddInput("HDMI 1", 0x11);
-            AddInput("HDMI 2", 0x12);
-            AddInput("DP 1", 0x0F);
-            AddInput("VGA", 0x01);
+            // VGA/Analog
+            AddInput("VGA / D-Sub", 0x01);
+            
+            inputMenu.DropDownItems.Add(new ToolStripSeparator());
+            
+            // DVI
+            AddInput("DVI-1", 0x03);
+            AddInput("DVI-2", 0x04);
+            
+            inputMenu.DropDownItems.Add(new ToolStripSeparator());
+            
+            // HDMI
+            AddInput("HDMI-1", 0x11);
+            AddInput("HDMI-2", 0x12);
+            AddInput("HDMI-3", 0x13);
+            
+            inputMenu.DropDownItems.Add(new ToolStripSeparator());
+            
+            // DisplayPort
+            AddInput("DisplayPort-1", 0x0F);
+            AddInput("DisplayPort-2", 0x10);
+            
+            inputMenu.DropDownItems.Add(new ToolStripSeparator());
+            
+            // USB-C / Thunderbolt
+            AddInput("USB-C / Thunderbolt", 0x1B);
 
-            var autostartItem = new ToolStripMenuItem("Activate autostart", null, ToggleAutostart)
+            bool isAutostartEnabled = AutoStart.IsRegistered();
+            var autostartItem = new ToolStripMenuItem(isAutostartEnabled ? "Disable Autostart" : "Enable Autostart", null, ToggleAutostart)
             {
-                Checked = AutoStart.IsRegistered()
+                Checked = isAutostartEnabled
             };
 
-            var switchItem = new ToolStripMenuItem("Switch now", null, (s, e) => ApplySelectedInput());
+            var switchItem = new ToolStripMenuItem("Switch Input Now", null, (s, e) => ApplySelectedInput())
+            {
+                Enabled = MonitorHelper.Monitors.Count > 0
+            };
+            switchItem.Font = new Font(switchItem.Font, FontStyle.Bold);
 
             menu.Items.Add(monitorMenu);
             menu.Items.Add(inputMenu);
+            menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add(switchItem);
             menu.Items.Add(new ToolStripSeparator());
             menu.Items.Add(autostartItem);
-            menu.Items.Add(new ToolStripMenuItem("Quit", null, (s, e) => Exit()));
+            menu.Items.Add(new ToolStripMenuItem("Exit", null, (s, e) => Exit()));
 
             return menu;
         }
@@ -119,28 +166,42 @@ namespace DdcTraySwitcher
 
         private void ToggleAutostart(object sender, EventArgs e)
         {
-            if (sender is ToolStripMenuItem item)
+            if (AutoStart.IsRegistered())
             {
-                if (item.Checked)
-                {
-                    AutoStart.Unregister();
-                    item.Checked = false;
-                }
-                else
-                {
-                    AutoStart.Register();
-                    item.Checked = true;
-                }
+                AutoStart.Unregister();
             }
+            else
+            {
+                AutoStart.Register();
+            }
+            
+            RebuildMenu();
         }
 
         private void ApplySelectedInput()
         {
+            if (MonitorHelper.Monitors.Count == 0)
+            {
+                MessageBox.Show("No DDC/CI capable monitors detected!\n\nPlease ensure your monitor supports DDC/CI and is properly connected.",
+                    "No Monitors Available", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            
+            if (selectedMonitor >= MonitorHelper.Monitors.Count)
+            {
+                MessageBox.Show($"Selected monitor (#{selectedMonitor + 1}) is no longer available.\nPlease select a different monitor.",
+                    "Monitor Not Available", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                selectedMonitor = 0;
+                SaveSettings();
+                RebuildMenu();
+                return;
+            }
+            
             bool result = MonitorHelper.SetInput(selectedMonitor, selectedInput);
             if (!result)
             {
-                MessageBox.Show($"Input could not be set!\nMonitor: {selectedMonitor}, Input: 0x{selectedInput:X}",
-                    "DDC error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Input could not be set!\nMonitor: {selectedMonitor + 1}, Input: 0x{selectedInput:X}",
+                    "DDC Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
