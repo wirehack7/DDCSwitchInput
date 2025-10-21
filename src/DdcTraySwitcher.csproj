@@ -10,7 +10,23 @@
     <ApplicationIcon>Resources\icon.ico</ApplicationIcon>
     <StartupObject>DdcTraySwitcher.Program</StartupObject>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
-    <TrimUnusedDependencies>true</TrimUnusedDependencies>
+    
+    <!-- IL Trimming for size reduction -->
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>link</TrimMode>
+    
+    <!-- Remove globalization data (~10-15MB savings) -->
+    <InvariantGlobalization>true</InvariantGlobalization>
+    
+    <!-- Reduce runtime features for smaller size -->
+    <EventSourceSupport>false</EventSourceSupport>
+    <DebuggerSupport>false</DebuggerSupport>
+    <EnableUnsafeBinaryFormatterSerialization>false</EnableUnsafeBinaryFormatterSerialization>
+    <HttpActivityPropagationSupport>false</HttpActivityPropagationSupport>
+    <MetadataUpdaterSupport>false</MetadataUpdaterSupport>
+    
+    <!-- Disable ReadyToRun for smaller output -->
+    <PublishReadyToRun>false</PublishReadyToRun>
   </PropertyGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\icon.ico" />
